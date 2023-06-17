@@ -1389,6 +1389,8 @@ final class GirFunction
 	 */
 	private bool checkOverride()
 	{
+		if ( isStatic () )
+		  return false;
 		if ( name == "get_type" )
 			return false;
 		if ( name == "to_string" && params.empty )
