@@ -582,7 +582,7 @@ final class GirFunction
 						if ( param.direction == GirParamDirection.Out )
 						{
 							if ( param.type.size > 0 )
-								buff ~= elementType.cType ~"* out"~ id ~" = cast("~ elementType.cType ~"*)sliceAlloc0("~ elementType.cType ~".sizeof * "~ to!string(param.type.size) ~");";
+								buff ~= elementType.cType ~"* out"~ id ~" = cast("~ elementType.cType ~"*)Memory.malloc0("~ elementType.cType ~".sizeof * "~ to!string(param.type.size) ~");";
 							else if ( !elementType.cType.endsWith("*") )
 								buff ~= elementType.cType ~"* out"~ id ~" = null;";
 							else
@@ -657,7 +657,7 @@ final class GirFunction
 					}
 					else if ( param.direction == GirParamDirection.Out )
 					{
-						buff ~= param.type.cType.removePtr() ~"* out"~ id ~" = sliceNew!"~ param.type.cType.removePtr() ~"();";
+						buff ~= param.type.cType.removePtr() ~"* out"~ id ~" = cast("~param.type.cType~")Memory.malloc0("~ param.type.cType.removePtr() ~".sizeof);";
 
 						gtkCall ~= "out"~ id;
 

@@ -428,7 +428,7 @@ final class GirStruct
 				buff ~= indenter.format("}");
 				buff ~= "\n";
 
-				if ( shouldFree() )
+				if ( shouldFree() || isSimpleStruct() )
 				{
 					buff ~= indenter.format("~this ()");
 					buff ~= indenter.format("{");
@@ -438,25 +438,16 @@ final class GirStruct
 					else
 						buff ~= indenter.format("if ( ownedRef )");
 
-					if ( "unref" in functions )
-						buff ~= indenter.format(functions["unref"].cType ~"("~ getHandleVar ~");");
-					else
-						buff ~= indenter.format(functions["free"].cType ~"("~ getHandleVar ~");");
+					if ( shouldFree() )
+					{
+						if ( "unref" in functions )
+							buff ~= indenter.format(functions["unref"].cType ~"("~ getHandleVar ~");");
+						else
+							buff ~= indenter.format(functions["free"].cType ~"("~ getHandleVar ~");");
+					}
+					else // isSimpleStruct
+						buff ~= indenter.format("Memory.free("~ getHandleVar ~");");
 
-					buff ~= indenter.format("}");
-					buff ~= "\n";
-				}
-				else if ( isSimpleStruct() )
-				{
-					buff ~= indenter.format("~this ()");
-					buff ~= indenter.format("{");
-
-					if ( wrapper.useRuntimeLinker )
-						buff ~= indenter.format("if ( Linker.isLoaded(LIBRARY_"~ pack.name.replace(".","").toUpper() ~") && ownedRef )");
-					else
-						buff ~= indenter.format("if ( ownedRef )");
-
-					buff ~= indenter.format("sliceFree("~ getHandleVar ~");");
 					buff ~= indenter.format("}");
 					buff ~= "\n";
 				}
@@ -898,7 +889,7 @@ final class GirStruct
 		}
 
 		if ( isSimpleStruct() )
-			imports ~= "glib.MemorySlice";
+			imports ~= "glib.Memory";
 
 		if ( wrapper.useRuntimeLinker && (shouldFree() || isSimpleStruct()) )
 			imports ~= "gtkd.Loader";
@@ -1026,14 +1017,14 @@ final class GirStruct
 						&& !param.type.cType.endsWith("**")
 						&& pack.getStruct(param.type.name) !is null
 						&& pack.getStruct(param.type.name).isDClass() )
-					imports ~= "glib.MemorySlice"; 
+					imports ~= "glib.Memory"; 
 
 				if ( param.direction == GirParamDirection.Out 
 						&& param.type.elementType
 						&& pack.getStruct(param.type.elementType.name) !is null
 						&& pack.getStruct(param.type.elementType.name).isDClass()
 						&& param.type.size > 0 )
-					imports ~= "glib.MemorySlice";
+					imports ~= "glib.Memory";
 			}
 
 			if ( func.type == GirFunctionType.Signal )
