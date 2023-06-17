@@ -194,8 +194,14 @@ final class GirFunction
 			reader.popFront();
 		}
 
-		if ( type == GirFunctionType.Function && name.startsWith("new") && returnType.cType != "void" )
+		if ( type == GirFunctionType.Function && name == "new" && returnType.cType != "void" )
 			type = GirFunctionType.Constructor;
+
+		if ( type == GirFunctionType.Constructor && name != "new" )
+		{
+		  type = GirFunctionType.Function;
+			returnType.name = strct.name;
+		}
 
 		// For the case where a param is `const gchar* name[]` whitch ends up in the gir files
 		// as an array with elementType name=utf8 c:type=gchar, missing the [].
